@@ -4,7 +4,6 @@ from cppcomponent_string cimport ComponentStringA
 from cppurl_parse cimport Component, Parsed, ParseStandardURL
 from cppurl_canon cimport Replacements
 from collections import namedtuple
-from cpython.string cimport PyString_AsString
 from libc.stdlib cimport malloc, free
 
 
@@ -15,7 +14,7 @@ result = namedtuple('result', ['scheme', 'username',
 cdef char ** to_cstring_array(list_str):
     cdef char **ret = <char **>malloc(len(list_str) * sizeof(char *))
     for i in xrange(len(list_str)):
-        ret[i] = PyString_AsString(list_str[i])
+        ret[i] = list_str[i]
     return ret
 
 
@@ -25,7 +24,7 @@ def Batched(urls):
     answer = []
     for i in xrange(url_len):
         x = res[i]
-        answer.append(result(x.scheme(), x.username(), 
+        answer.append(result(x.scheme(), x.username(),
                              x.password(), x.host(), x.port(),
                              x.path(), x.query(), x.ref()))
     return answer
@@ -39,13 +38,13 @@ cdef Parsed cppParseStandard(char *url, int url_len):
 
 def ParseStandard(url):
         p = cppParseStandard(url, len(url))
-        return result(ComponentStringA(p.scheme, url), 
+        return result(ComponentStringA(p.scheme, url),
                       ComponentStringA(p.username, url),
-                      ComponentStringA(p.password, url), 
+                      ComponentStringA(p.password, url),
                       ComponentStringA(p.host, url),
-                      ComponentStringA(p.port, url), 
+                      ComponentStringA(p.port, url),
                       ComponentStringA(p.path, url),
-                      ComponentStringA(p.query, url), 
+                      ComponentStringA(p.query, url),
                       ComponentStringA(p.ref, url))
 
 
@@ -126,12 +125,12 @@ cdef class URL:
         return self._thisptr.ref()
 
     def getAll(self):
-        return result(self.scheme(), self.username(), self.password(), self.host(), 
+        return result(self.scheme(), self.username(), self.password(), self.host(),
                       self.port(), self.path(), self.query(), self.ref())
 
     cdef Parsed getParsed(self):
         return self._thisptr.parsed_for_possibly_invalid_spec()
-    
+
     '''TODO
     cpdef ReplaceComponents(self, scheme=None, username=None):
         cdef Replacements[char] replacement
